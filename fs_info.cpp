@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <expected>
+#include <sys/statvfs.h>
 
 #include "fs_info.hpp"
 
@@ -46,4 +47,15 @@ std::expected<std::vector<FileSystemInfo>, std::string> read_mounts(const std::f
     } else {
         return std::unexpected("Could not open file");
     }
+}
+
+void get_fs_stats(FileSystemInfo& info) {
+    struct statvfs buf;
+    int ret = statvfs(info.mounted_on.c_str(), &buf);
+    if (!ret) {
+        info.total_bytes = buf.f_blocks * buf.f_frsize;
+        info.available_bytes = buf.f_bavail * buf.f_frsize;
+    }
+
+    return;
 }
