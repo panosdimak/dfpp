@@ -59,3 +59,7 @@ void get_fs_stats(FileSystemInfo& info) {
 
     return;
 }
+
+bool is_real_filesystem(const FileSystemInfo& info) {
+    return info.device.starts_with("/dev");
+}

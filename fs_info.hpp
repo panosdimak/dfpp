@@ -14,3 +14,6 @@ std::expected<std::vector<FileSystemInfo>, std::string> read_mounts(const std::f
 
 // Get total and available bytes of a provided filesystem
 void get_fs_stats(FileSystemInfo& info);
+
+// Check whether a provided filesystem is a real device or a pseudo-filesystem
+bool is_real_filesystem(const FileSystemInfo& info);
