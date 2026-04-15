@@ -1,4 +1,7 @@
 #include <string>
+#include <fstream>
+#include <expected>
+
 #include "fs_info.hpp"
 
 std::optional<FileSystemInfo> parse_mount_line(std::string_view line) {
@@ -27,4 +30,20 @@ std::optional<FileSystemInfo> parse_mount_line(std::string_view line) {
     info.fs_type = *fstype;
 
     return info;
+}
+
+std::expected<std::vector<FileSystemInfo>, std::string> read_mounts(const std::filesystem::path& fpath) {
+    std::vector<FileSystemInfo> vmounts;
+    std::ifstream file(fpath);
+    std::string line;
+
+    if (file.is_open()) {
+        while (std::getline(file, line)) {
+            if (auto info = parse_mount_line(line); info)
+                vmounts.push_back(std::move(*info));
+        }
+        return vmounts;
+    } else {
+        return std::unexpected("Could not open file");
+    }
 }
