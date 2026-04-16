@@ -55,6 +55,7 @@ void get_fs_stats(FileSystemInfo& info) {
     if (!ret) {
         info.total_bytes = buf.f_blocks * buf.f_frsize;
         info.available_bytes = buf.f_bavail * buf.f_frsize;
+        info.used_bytes = *info.total_bytes - *info.available_bytes;
     }
 
     return;
