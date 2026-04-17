@@ -1,4 +1,5 @@
 #include <vector>
+#include <numeric>
 #include <functional>
 #include <algorithm>
 #include <ranges>
@@ -13,6 +14,7 @@ struct FormattedInfo {
     std::string avail_size;
     std::string type;
     std::string device;
+    double usage_ratio;
 };
 
 std::string make_border(std::string_view left, std::string_view fill, std::string_view sep, std::string_view right,
@@ -49,6 +51,8 @@ std::string make_table(const std::vector<FileSystemInfo>& info) {
        fmt_row.type = row.fs_type;
        fmt_row.device = row.device;
 
+       fmt_row.usage_ratio = static_cast<double>(*row.used_bytes) / static_cast<double>(*row.total_bytes);
+
        fmt_info.push_back(std::move(fmt_row));
    }
 
@@ -70,7 +74,17 @@ std::string make_table(const std::vector<FileSystemInfo>& info) {
 
    std::string table;
 
-   table += make_border("╭", "─", "┬", "╮", max_fmt_sizes);
+   constexpr std::string_view RESET             = "\033[0m";
+   constexpr std::string_view BOLD_PALE_BLUE    = "\033[1;38;5;153m";
+   constexpr std::string_view DIM_WHITE         = "\033[2;38;5;231m";
+
+   table += make_border("╭", "─", "─", "╮", max_fmt_sizes);
+
+   table += std::format("│ {} local {:<{}} │\n", info.size(),
+                        info.size() == 1 ? "device" : "devices",
+                        std::accumulate(max_fmt_sizes.begin(), max_fmt_sizes.end(), 0) + 7);
+
+   table += make_border("├", "─", "┬", "┤", max_fmt_sizes);
 
    table += std::format("│ {:<{}} │ {:>{}} │ {:>{}} │ {:>{}} │ {:<{}} │ {:<{}} │\n",
        "MOUNTED ON", max_fmt_sizes[0], "TOTAL", max_fmt_sizes[1], "USED", max_fmt_sizes[2],
@@ -78,10 +92,28 @@ std::string make_table(const std::vector<FileSystemInfo>& info) {
 
    table += make_border("├", "─", "┼", "┤", max_fmt_sizes);
 
+   auto colorize = [&](std::string_view code, std::string_view text) {
+       return std::string(code) + std::string(text) + std::string(RESET);
+   };
+
+   auto pad_left = [](std::string_view s, size_t w) {
+       return std::format("{:>{}}", s, w);
+   };
+
+   auto pad_right = [](std::string_view s, size_t w) {
+       return std::format("{:<{}}", s, w);
+   };
+
    for (const auto& row : fmt_info) {
-       table += std::format("│ {:<{}} │ {:>{}} │ {:>{}} │ {:>{}} │ {:<{}} │ {:<{}} │\n",
-           row.mounted_on, max_fmt_sizes[0], row.total_size, max_fmt_sizes[1], row.used_size, max_fmt_sizes[2],
-           row.avail_size, max_fmt_sizes[3], row.type, max_fmt_sizes[4], row.device, max_fmt_sizes[5]);
+       auto mounted  = colorize(BOLD_PALE_BLUE, pad_right(row.mounted_on, max_fmt_sizes[0]));
+       auto total    = colorize(DIM_WHITE,  pad_left(row.total_size,  max_fmt_sizes[1]));
+       auto used     = colorize(DIM_WHITE,  pad_left(row.used_size,   max_fmt_sizes[2]));
+       auto avail    = colorize(usage_ansi_code(row.usage_ratio), pad_left(row.avail_size, max_fmt_sizes[3]));
+       auto type     = colorize(DIM_WHITE,  pad_right(row.type,       max_fmt_sizes[4]));
+       auto device   = colorize(DIM_WHITE,  pad_right(row.device,     max_fmt_sizes[5]));
+
+       table += std::format("│ {} │ {} │ {} │ {} │ {} │ {} │\n",
+           mounted, total, used, avail, type, device);
    }
 
    table += make_border("╰", "─", "┴", "╯", max_fmt_sizes);
