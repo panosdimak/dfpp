@@ -17,3 +17,12 @@ std::string format_size(Bytes bytes) {
 
     return std::format("{:.{}f} {}", size, precision, units[counter]);
 }
+
+std::string_view usage_ansi_code(double ratio) {
+    if (ratio >= 0.0 && ratio < 0.6)
+        return "\033[38;5;193m";    // green
+    else if (ratio <= 0.8)
+        return "\033[38;5;223m";    // orange
+    else
+        return "\033[38;5;217m";    // red-pink
+}
