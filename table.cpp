@@ -80,9 +80,13 @@ std::string make_table(const std::vector<FileSystemInfo>& info) {
 
    table += make_border("╭", "─", "─", "╮", max_fmt_sizes);
 
-   table += std::format("│ {} local {:<{}} │\n", info.size(),
-                        info.size() == 1 ? "device" : "devices",
-                        std::accumulate(max_fmt_sizes.begin(), max_fmt_sizes.end(), 0) + 7);
+   auto inner_width = std::accumulate(max_fmt_sizes.begin(), max_fmt_sizes.end(), 0uz)
+                        + 3 * max_fmt_sizes.size() - 1;     // 2 spaces per column + N-1 separators
+
+   auto label = std::format("{} local {}", info.size(),
+                            info.size() == 1 ? "device" : "devices");
+
+   table += std::format("│ {:<{}} │\n", label, inner_width - 2);    // -2 for spaces
 
    table += make_border("├", "─", "┬", "┤", max_fmt_sizes);
 
