@@ -17,3 +17,6 @@ void get_fs_stats(FileSystemInfo& info);
 
 // Check whether a provided filesystem is a real device or a pseudo-filesystem
 bool is_real_filesystem(const FileSystemInfo& info);
+
+std::optional<FileSystemInfo> find_mount_for_path(const std::vector<FileSystemInfo>& entries,
+                                                    const std::filesystem::path& target);

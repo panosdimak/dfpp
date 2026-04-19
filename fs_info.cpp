@@ -2,6 +2,7 @@
 #include <fstream>
 #include <expected>
 #include <sys/statvfs.h>
+#include <filesystem>
 
 #include "fs_info.hpp"
 
@@ -63,4 +64,20 @@ void get_fs_stats(FileSystemInfo& info) {
 
 bool is_real_filesystem(const FileSystemInfo& info) {
     return info.device.starts_with("/dev");
+}
+
+std::optional<FileSystemInfo> find_mount_for_path(const std::vector<FileSystemInfo>& entries,
+                                                    const std::filesystem::path& target) {
+
+    size_t max_length = 0;
+    std::optional<FileSystemInfo> max_entry = std::nullopt;
+    for (const auto& entry : entries) {
+        if (!target.lexically_relative(entry.mounted_on).string().starts_with("..")) {
+             if (entry.mounted_on.string().size() > max_length) {
+                 max_length = entry.mounted_on.string().size();
+                 max_entry = entry;
+             }
+        }
+    }
+    return max_entry;
 }
