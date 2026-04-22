@@ -1,4 +1,6 @@
+#include <array>
 #include <string>
+#include <ranges>
 
 #include "types.hpp"
 
@@ -25,4 +27,29 @@ std::string_view usage_ansi_code(double ratio) {
         return "\033[38;5;223m";    // orange
     else
         return "\033[38;5;217m";    // red-pink
+}
+
+std::array<std::string, 2> percentage_bar(double ratio, size_t width) {
+	std::array<std::string, 2> bar_segments;
+
+	constexpr std::string_view full_block = "█";
+	constexpr std::string_view half_block = "▌";
+	constexpr std::string_view empty_block = "░";
+
+	double used = ratio * width;
+	size_t full_size = static_cast<size_t>(used);
+	bool half = (used - full_size) >= 0.5;
+	size_t empty_size = width - full_size - (half ? 1 : 0);
+
+	bar_segments[0] = std::views::repeat(full_block, full_size)
+		| std::views::join
+		| std::ranges::to<std::string>();
+
+	if (half) bar_segments[0] += half_block;
+
+	bar_segments[1] += std::views::repeat(empty_block, empty_size)
+		| std::views::join
+		| std::ranges::to<std::string>();
+
+	return bar_segments;
 }
