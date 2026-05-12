@@ -50,6 +50,7 @@ main.cpp         CLI driver
 
 ## TODO
 
+- [ ] Auto-size based on terminal width
 - [ ] CLI flags for size units, showing all filesystems, disabling color, JSON output
 - [ ] Sorting by size, usage, name
 - [ ] macOS support
