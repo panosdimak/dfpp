@@ -14,7 +14,9 @@
 - Directory arguments with longest-prefix mount matching
 - No external dependencies — pure C++ standard library and POSIX
 
-## Build
+## Installation
+
+### Manual
 
 ```bash
 make
@@ -22,13 +24,41 @@ make
 
 Requires GCC with C++23 support (GCC 14+).
 
+### Via Nix
+
+Run it directly via `nix run`:
+
+```bash
+nix run github:panosdimak/dfpp
+```
+
+Or drop into a temporary shell with `dfpp` on your `PATH`:
+
+```bash
+nix shell github:panosdimak/dfpp
+```
+
+Or add it to your system configuration:
+
+```nix
+# inputs
+inputs.dfpp.url = "github:panosdimak/dfpp";
+
+# in a module (with inputs in scope)
+environment.systemPackages = [
+  inputs.dfpp.packages.${pkgs.stdenv.hostPlatform.system}.default
+];
+```
+
 ## Usage
 
 ```bash
-./dfpp                  # all real filesystems
-./dfpp /data .          # only the filesystems owning these paths
-./dfpp ~/projects       # relative and absolute paths both work
+dfpp                    # all real filesystems
+dfpp /data /home        # only the filesystems owning these paths
+dfpp ~/projects .       # relative and absolute paths both work
 ```
+
+If you built manually with `make`, run it as `./dfpp` from the build directory.
 
 ## How it works
 

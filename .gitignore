@@ -1,2 +1,6 @@
 *.o
+*.d
 dfpp
+
+# nix
+result*
