@@ -1,10 +1,11 @@
-#include <string>
-#include <fstream>
-#include <expected>
-#include <sys/statvfs.h>
-#include <filesystem>
-
 #include "fs_info.hpp"
+
+#include <sys/statvfs.h>
+
+#include <expected>
+#include <filesystem>
+#include <fstream>
+#include <string>
 
 std::optional<FileSystemInfo> parse_mount_line(std::string_view line) {
     FileSystemInfo info{};
@@ -23,7 +24,7 @@ std::optional<FileSystemInfo> parse_mount_line(std::string_view line) {
     auto mount = next_field();
     auto fstype = next_field();
 
-    if (!device || !mount || ! fstype) {
+    if (!device || !mount || !fstype) {
         return std::nullopt;
     }
 
@@ -67,16 +68,15 @@ bool is_real_filesystem(const FileSystemInfo& info) {
 }
 
 std::optional<FileSystemInfo> find_mount_for_path(const std::vector<FileSystemInfo>& entries,
-                                                    const std::filesystem::path& target) {
-
+                                                  const std::filesystem::path& target) {
     size_t max_length = 0;
     std::optional<FileSystemInfo> max_entry = std::nullopt;
     for (const auto& entry : entries) {
         if (!target.lexically_relative(entry.mounted_on).string().starts_with("..")) {
-             if (entry.mounted_on.string().size() > max_length) {
-                 max_length = entry.mounted_on.string().size();
-                 max_entry = entry;
-             }
+            if (entry.mounted_on.string().size() > max_length) {
+                max_length = entry.mounted_on.string().size();
+                max_entry = entry;
+            }
         }
     }
     return max_entry;

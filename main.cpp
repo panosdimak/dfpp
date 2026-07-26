@@ -1,8 +1,8 @@
+#include <filesystem>
 #include <print>
 #include <set>
-#include <filesystem>
-#include <vector>
 #include <system_error>
+#include <vector>
 
 #include "fs_info.hpp"
 #include "table.hpp"
@@ -27,9 +27,7 @@ int main(int argc, char* argv[]) {
         std::erase_if(entries, [](const auto& fs) { return !is_real_filesystem(fs); });
 
         std::set<std::string> seen;
-        std::erase_if(entries, [&seen](const auto& fs) {
-            return !seen.insert(fs.device).second;
-        });
+        std::erase_if(entries, [&seen](const auto& fs) { return !seen.insert(fs.device).second; });
 
         for (auto& fs : entries)
             get_fs_stats(fs);
@@ -42,16 +40,13 @@ int main(int argc, char* argv[]) {
             }
 
             std::set<std::string> seen;
-            std::erase_if(matches, [&seen](const auto& fs) {
-               return !seen.insert(fs.device).second;
-            });
+            std::erase_if(matches, [&seen](const auto& fs) { return !seen.insert(fs.device).second; });
 
             std::println("{}", make_table(matches));
         } else {
             std::print("{}", make_table(mounts.value()));
         }
-    }
-    else {
+    } else {
         std::println("{}", mounts.error());
     }
 

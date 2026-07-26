@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
-#include <string_view>
 #include <expected>
+#include <string_view>
+#include <vector>
+
 #include "types.hpp"
 
 // Parse a single line from /proc/mounts.
@@ -19,4 +20,4 @@ void get_fs_stats(FileSystemInfo& info);
 bool is_real_filesystem(const FileSystemInfo& info);
 
 std::optional<FileSystemInfo> find_mount_for_path(const std::vector<FileSystemInfo>& entries,
-                                                    const std::filesystem::path& target);
+                                                  const std::filesystem::path& target);
