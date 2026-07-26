@@ -1,4 +1,5 @@
 #include <array>
+#include <cassert>
 #include <ranges>
 #include <string>
 
@@ -8,9 +9,9 @@ constexpr std::array<std::string, 5> units{"B", "KiB", "MiB", "GiB", "TiB"};
 
 std::string format_size(Bytes bytes) {
     double size = static_cast<double>(bytes);
-    int counter = 0;
+    size_t counter = 0;
 
-    while (size >= 1024 && counter < static_cast<int>(units.size() - 1)) {
+    while (size >= 1024 && counter < (units.size() - 1)) {
         size = size / 1024;
         counter++;
     }
@@ -30,15 +31,18 @@ std::string_view usage_ansi_code(double ratio) {
 }
 
 std::array<std::string, 2> percentage_bar(double ratio, size_t width) {
+    assert(ratio >= 0.0 && ratio <= 1.0);
+
     std::array<std::string, 2> bar_segments;
 
     constexpr std::string_view full_block = "█";
     constexpr std::string_view half_block = "▌";
     constexpr std::string_view empty_block = "░";
 
-    double used = ratio * width;
+    double used = ratio * static_cast<double>(width);
     size_t full_size = static_cast<size_t>(used);
-    bool half = (used - full_size) >= 0.5;
+    double frac = used - static_cast<double>(full_size);
+    bool half = frac >= 0.5;
     size_t empty_size = width - full_size - (half ? 1 : 0);
 
     bar_segments[0] = std::views::repeat(full_block, full_size) | std::views::join | std::ranges::to<std::string>();

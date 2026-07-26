@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
                 matches.push_back(*res);
             }
 
-            std::set<std::string> seen;
-            std::erase_if(matches, [&seen](const auto& fs) { return !seen.insert(fs.device).second; });
+            std::set<std::string> args_seen;
+            std::erase_if(matches, [&args_seen](const auto& fs) { return !args_seen.insert(fs.device).second; });
 
             std::println("{}", make_table(matches));
         } else {

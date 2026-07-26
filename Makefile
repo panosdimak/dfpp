@@ -10,7 +10,7 @@ SRCS = main.cpp fs_info.cpp format.cpp table.cpp
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(OBJS:.o=.d)
 
-release: CXXFLAGS += -O2
+release: CXXFLAGS += -O2 -DNDEBUG
 release: LDFLAGS += -s
 release: dfpp
 
