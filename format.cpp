@@ -5,9 +5,9 @@
 
 #include "types.hpp"
 
-constexpr std::array<std::string, 5> units{"B", "KiB", "MiB", "GiB", "TiB"};
-
 std::string format_size(Bytes bytes) {
+    static constexpr std::array<std::string_view, 5> units{"B", "KiB", "MiB", "GiB", "TiB"};
+
     double size = static_cast<double>(bytes);
     size_t counter = 0;
 
@@ -22,12 +22,16 @@ std::string format_size(Bytes bytes) {
 }
 
 std::string_view usage_ansi_code(double ratio) {
+    static constexpr std::string_view usage_low = "\033[38;5;193m";   // green
+    static constexpr std::string_view usage_warn = "\033[38;5;223m";  // yellow
+    static constexpr std::string_view usage_high = "\033[38;5;217m";  // red
+
     if (ratio >= 0.0 && ratio < 0.6)
-        return "\033[38;5;193m";  // green
+        return usage_low;
     else if (ratio <= 0.8)
-        return "\033[38;5;223m";  // orange
+        return usage_warn;
     else
-        return "\033[38;5;217m";  // red-pink
+        return usage_high;
 }
 
 std::array<std::string, 2> percentage_bar(double ratio, size_t width) {
