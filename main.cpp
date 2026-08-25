@@ -7,7 +7,7 @@
 #include "fs_info.hpp"
 #include "table.hpp"
 
-int main(int argc, char* argv[]) {
+auto main(int argc, char* argv[]) -> int {
     std::vector<std::filesystem::path> varg_paths;
     if (argc > 1) {
         for (int i = 1; i < argc; i++) {

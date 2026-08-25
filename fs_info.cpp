@@ -7,7 +7,7 @@
 #include <fstream>
 #include <string>
 
-std::optional<FileSystemInfo> parse_mount_line(std::string_view line) {
+auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
     FileSystemInfo info{};
     std::size_t start = 0;
 
@@ -35,7 +35,7 @@ std::optional<FileSystemInfo> parse_mount_line(std::string_view line) {
     return info;
 }
 
-std::expected<std::vector<FileSystemInfo>, std::string> read_mounts(const std::filesystem::path& fpath) {
+auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vector<FileSystemInfo>, std::string> {
     std::vector<FileSystemInfo> vmounts;
     std::ifstream file(fpath);
     std::string line;
@@ -52,7 +52,7 @@ std::expected<std::vector<FileSystemInfo>, std::string> read_mounts(const std::f
     }
 }
 
-void get_fs_stats(FileSystemInfo& info) {
+auto get_fs_stats(FileSystemInfo& info) -> void {
     struct statvfs buf;
     int ret = statvfs(info.mounted_on.c_str(), &buf);
     if (!ret) {
@@ -64,13 +64,12 @@ void get_fs_stats(FileSystemInfo& info) {
     return;
 }
 
-bool is_real_filesystem(const FileSystemInfo& info) {
+auto is_real_filesystem(const FileSystemInfo& info) -> bool {
     return info.device.starts_with("/dev");
 }
 
-std::optional<FileSystemInfo> find_mount_for_path(
-    const std::vector<FileSystemInfo>& entries, const std::filesystem::path& target
-) {
+auto find_mount_for_path(const std::vector<FileSystemInfo>& entries, const std::filesystem::path& target)
+    -> std::optional<FileSystemInfo> {
     size_t max_length = 0;
     std::optional<FileSystemInfo> max_entry = std::nullopt;
     for (const auto& entry : entries) {

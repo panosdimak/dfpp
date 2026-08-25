@@ -5,4 +5,4 @@
 
 #include "types.hpp"
 
-std::string make_table(const std::vector<FileSystemInfo>& info);
+auto make_table(const std::vector<FileSystemInfo>& info) -> std::string;

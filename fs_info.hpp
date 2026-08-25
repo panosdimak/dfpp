@@ -8,17 +8,16 @@
 
 // Parse a single line from /proc/mounts.
 // Returns nullopt if parsing fails
-std::optional<FileSystemInfo> parse_mount_line(std::string_view line);
+auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo>;
 
 // Read and parse all mounts from /proc/mounts
-std::expected<std::vector<FileSystemInfo>, std::string> read_mounts(const std::filesystem::path& fpath);
+auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vector<FileSystemInfo>, std::string>;
 
 // Get total, used and available bytes of a provided filesystem
-void get_fs_stats(FileSystemInfo& info);
+auto get_fs_stats(FileSystemInfo& info) -> void;
 
 // Check whether a provided filesystem is a real device or a pseudo-filesystem
-bool is_real_filesystem(const FileSystemInfo& info);
+auto is_real_filesystem(const FileSystemInfo& info) -> bool;
 
-std::optional<FileSystemInfo> find_mount_for_path(
-    const std::vector<FileSystemInfo>& entries, const std::filesystem::path& target
-);
+auto find_mount_for_path(const std::vector<FileSystemInfo>& entries, const std::filesystem::path& target)
+    -> std::optional<FileSystemInfo>;

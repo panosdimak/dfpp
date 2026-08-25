@@ -5,8 +5,8 @@
 
 #include "types.hpp"
 
-std::string format_size(Bytes bytes);
+auto format_size(Bytes bytes) -> std::string;
 
-std::string_view usage_ansi_code(double ratio);
+auto usage_ansi_code(double ratio) -> std::string_view;
 
-std::array<std::string, 2> percentage_bar(double ratio, size_t width);
+auto percentage_bar(double ratio, size_t width) -> std::array<std::string, 2>;
