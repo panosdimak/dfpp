@@ -1,7 +1,10 @@
 #include <algorithm>
+#include <array>
+#include <format>
 #include <functional>
 #include <numeric>
 #include <ranges>
+#include <string_view>
 #include <vector>
 
 #include "format.hpp"
@@ -59,24 +62,26 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
         fmt_info.push_back(std::move(fmt_row));
     }
 
+    constexpr std::array<std::string_view, 7> headers{"MOUNTED ON", "TOTAL", "USED", "AVAIL", "USE%", "TYPE", "DEVICE"};
+
     std::array<size_t, 7> max_fmt_sizes{};
 
-    auto max_len = [](const auto& range, auto proj) {
-        return std::ranges::max(range | std::views::transform([&](const auto& x) {
-            return std::invoke(proj, x).size();
-        }));
+    auto max_len = [](const auto& range, auto proj, std::string_view header) {
+        return std::ranges::fold_left(range, header.size(), [proj](size_t acc, const auto& item) {
+            return std::max(acc, std::invoke(proj, item).size());
+        });
     };
 
     constexpr size_t bar_width = 12;
 
-    max_fmt_sizes[0] = std::max(max_len(fmt_info, &FormattedInfo::mounted_on), std::string_view("MOUNTED_ON").size());
-    max_fmt_sizes[1] = std::max(max_len(fmt_info, &FormattedInfo::total_size), std::string_view("TOTAL").size());
-    max_fmt_sizes[2] = std::max(max_len(fmt_info, &FormattedInfo::used_size), std::string_view("USED").size());
-    max_fmt_sizes[3] = std::max(max_len(fmt_info, &FormattedInfo::avail_size), std::string_view("AVAIL").size());
-    max_fmt_sizes[4] =
-        std::max(max_len(fmt_info, &FormattedInfo::pct), std::string_view("USE%").size()) + 1 + bar_width;
-    max_fmt_sizes[5] = std::max(max_len(fmt_info, &FormattedInfo::type), std::string_view("TYPE").size());
-    max_fmt_sizes[6] = std::max(max_len(fmt_info, &FormattedInfo::device), std::string_view("DEVICE").size());
+    max_fmt_sizes[0] = max_len(fmt_info, &FormattedInfo::mounted_on, headers[0]);
+    max_fmt_sizes[1] = max_len(fmt_info, &FormattedInfo::total_size, headers[1]);
+    max_fmt_sizes[2] = max_len(fmt_info, &FormattedInfo::used_size, headers[2]);
+    max_fmt_sizes[3] = max_len(fmt_info, &FormattedInfo::avail_size, headers[3]);
+    const size_t pct_field = max_len(fmt_info, &FormattedInfo::pct, headers[4]) + 1;  // text + separating space
+    max_fmt_sizes[4] = pct_field + bar_width;
+    max_fmt_sizes[5] = max_len(fmt_info, &FormattedInfo::type, headers[5]);
+    max_fmt_sizes[6] = max_len(fmt_info, &FormattedInfo::device, headers[6]);
 
     std::string table;
 
@@ -97,9 +102,9 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
     table += make_border("├", "─", "┬", "┤", max_fmt_sizes);
 
     table += std::format(
-        "│ {:<{}} │ {:>{}} │ {:>{}} │ {:>{}} │ {:^{}} │ {:<{}} │ {:<{}} │\n", "MOUNTED ON", max_fmt_sizes[0], "TOTAL",
-        max_fmt_sizes[1], "USED", max_fmt_sizes[2], "AVAIL", max_fmt_sizes[3], "USE%", max_fmt_sizes[4], "TYPE",
-        max_fmt_sizes[5], "DEVICE", max_fmt_sizes[6]
+        "│ {:<{}} │ {:>{}} │ {:>{}} │ {:>{}} │ {:^{}} │ {:<{}} │ {:<{}} │\n", headers[0], max_fmt_sizes[0], headers[1],
+        max_fmt_sizes[1], headers[2], max_fmt_sizes[2], headers[3], max_fmt_sizes[3], headers[4], max_fmt_sizes[4],
+        headers[5], max_fmt_sizes[5], headers[6], max_fmt_sizes[6]
     );
 
     table += make_border("├", "─", "┼", "┤", max_fmt_sizes);
@@ -123,7 +128,7 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
         auto bar_segments = percentage_bar(row.usage_ratio, bar_width);
         auto full = colorize(usage_ansi_code(row.usage_ratio), bar_segments[0]);
         auto empty = colorize(DIM_GRAY, bar_segments[1]);
-        auto pct_text = std::format("{:>{}}", row.pct, max_fmt_sizes[4] - bar_width);
+        auto pct_text = std::format("{:>{}}", row.pct, pct_field);
         std::string pct_bar = full + empty + pct_text;
 
         table +=

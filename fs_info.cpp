@@ -4,8 +4,10 @@
 
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
+#include <system_error>
 
 auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
     FileSystemInfo info{};
@@ -40,16 +42,19 @@ auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vecto
     std::ifstream file(fpath);
     std::string line;
 
-    if (file.is_open()) {
-        while (std::getline(file, line)) {
-            if (auto info = parse_mount_line(line); info) {
-                vmounts.push_back(std::move(*info));
-            }
-        }
-        return vmounts;
-    } else {
-        return std::unexpected("Could not open file");
+    if (!file.is_open()) {
+        return std::unexpected(
+            std::format("{}: {}", fpath.string(), std::error_code(errno, std::system_category()).message())
+        );
     }
+
+    while (std::getline(file, line)) {
+        if (auto info = parse_mount_line(line); info) {
+            vmounts.push_back(std::move(*info));
+        }
+    }
+
+    return vmounts;
 }
 
 auto get_fs_stats(FileSystemInfo& info) -> void {
@@ -60,8 +65,6 @@ auto get_fs_stats(FileSystemInfo& info) -> void {
         info.available_bytes = buf.f_bavail * buf.f_frsize;
         info.used_bytes = *info.total_bytes - *info.available_bytes;
     }
-
-    return;
 }
 
 auto is_real_filesystem(const FileSystemInfo& info) -> bool {

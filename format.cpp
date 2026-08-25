@@ -1,5 +1,6 @@
 #include <array>
 #include <cassert>
+#include <format>
 #include <ranges>
 #include <string>
 

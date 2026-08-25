@@ -36,8 +36,12 @@ auto main(int argc, char* argv[]) -> int {
         if (!varg_paths.empty()) {
             std::vector<FileSystemInfo> matches;
             for (const auto& arg : varg_paths) {
-                auto res = find_mount_for_path(entries, arg);
-                matches.push_back(*res);
+                if (auto res = find_mount_for_path(entries, arg); res.has_value()) {
+                    matches.push_back(std::move(*res));
+                } else {
+                    std::println(stderr, "dfpp: cannot find mount for {}", arg.string());
+                    return 1;
+                }
             }
 
             std::set<std::string> args_seen;
@@ -45,10 +49,11 @@ auto main(int argc, char* argv[]) -> int {
 
             std::println("{}", make_table(matches));
         } else {
-            std::print("{}", make_table(mounts.value()));
+            std::println("{}", make_table(mounts.value()));
         }
     } else {
-        std::println("{}", mounts.error());
+        std::println(stderr, "{}", mounts.error());
+        return 1;
     }
 
     return 0;
