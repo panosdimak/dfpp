@@ -15,4 +15,13 @@ AllowShortLoopsOnASingleLine: false
 
 SortIncludes: CaseInsensitive
 SeparateDefinitionBlocks: Always
+
+AlignAfterOpenBracket: BlockIndent
+LambdaBodyIndentation: OuterScope
+AccessModifierOffset: -4
+InsertBraces: true
+RemoveSemicolon: true
+
+InsertNewlineAtEOF: true
+LineEnding: LF
 ...

@@ -29,8 +29,9 @@ int main(int argc, char* argv[]) {
         std::set<std::string> seen;
         std::erase_if(entries, [&seen](const auto& fs) { return !seen.insert(fs.device).second; });
 
-        for (auto& fs : entries)
+        for (auto& fs : entries) {
             get_fs_stats(fs);
+        }
 
         if (!varg_paths.empty()) {
             std::vector<FileSystemInfo> matches;

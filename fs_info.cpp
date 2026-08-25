@@ -42,8 +42,9 @@ std::expected<std::vector<FileSystemInfo>, std::string> read_mounts(const std::f
 
     if (file.is_open()) {
         while (std::getline(file, line)) {
-            if (auto info = parse_mount_line(line); info)
+            if (auto info = parse_mount_line(line); info) {
                 vmounts.push_back(std::move(*info));
+            }
         }
         return vmounts;
     } else {
@@ -67,8 +68,9 @@ bool is_real_filesystem(const FileSystemInfo& info) {
     return info.device.starts_with("/dev");
 }
 
-std::optional<FileSystemInfo> find_mount_for_path(const std::vector<FileSystemInfo>& entries,
-                                                  const std::filesystem::path& target) {
+std::optional<FileSystemInfo> find_mount_for_path(
+    const std::vector<FileSystemInfo>& entries, const std::filesystem::path& target
+) {
     size_t max_length = 0;
     std::optional<FileSystemInfo> max_entry = std::nullopt;
     for (const auto& entry : entries) {

@@ -18,8 +18,10 @@ struct FormattedInfo {
     double usage_ratio;
 };
 
-std::string make_border(std::string_view left, std::string_view fill, std::string_view sep, std::string_view right,
-                        const std::array<size_t, 7>& widths) {
+std::string make_border(
+    std::string_view left, std::string_view fill, std::string_view sep, std::string_view right,
+    const std::array<size_t, 7>& widths
+) {
     std::string border;
 
     auto repeated = [&](const size_t width) {
@@ -29,8 +31,9 @@ std::string make_border(std::string_view left, std::string_view fill, std::strin
     border += left;
     for (size_t i = 0; i < widths.size(); i++) {
         border += repeated(widths[i]);
-        if (i < widths.size() - 1)
+        if (i < widths.size() - 1) {
             border += sep;
+        }
     }
     border += right;
     border += "\n";
@@ -59,8 +62,9 @@ std::string make_table(const std::vector<FileSystemInfo>& info) {
     std::array<size_t, 7> max_fmt_sizes{};
 
     auto max_len = [](const auto& range, auto proj) {
-        return std::ranges::max(range |
-                                std::views::transform([&](const auto& x) { return std::invoke(proj, x).size(); }));
+        return std::ranges::max(range | std::views::transform([&](const auto& x) {
+            return std::invoke(proj, x).size();
+        }));
     };
 
     constexpr size_t bar_width = 12;
@@ -92,10 +96,11 @@ std::string make_table(const std::vector<FileSystemInfo>& info) {
 
     table += make_border("├", "─", "┬", "┤", max_fmt_sizes);
 
-    table +=
-        std::format("│ {:<{}} │ {:>{}} │ {:>{}} │ {:>{}} │ {:^{}} │ {:<{}} │ {:<{}} │\n", "MOUNTED ON",
-                    max_fmt_sizes[0], "TOTAL", max_fmt_sizes[1], "USED", max_fmt_sizes[2], "AVAIL", max_fmt_sizes[3],
-                    "USE%", max_fmt_sizes[4], "TYPE", max_fmt_sizes[5], "DEVICE", max_fmt_sizes[6]);
+    table += std::format(
+        "│ {:<{}} │ {:>{}} │ {:>{}} │ {:>{}} │ {:^{}} │ {:<{}} │ {:<{}} │\n", "MOUNTED ON", max_fmt_sizes[0], "TOTAL",
+        max_fmt_sizes[1], "USED", max_fmt_sizes[2], "AVAIL", max_fmt_sizes[3], "USE%", max_fmt_sizes[4], "TYPE",
+        max_fmt_sizes[5], "DEVICE", max_fmt_sizes[6]
+    );
 
     table += make_border("├", "─", "┼", "┤", max_fmt_sizes);
 

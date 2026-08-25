@@ -9,6 +9,7 @@ CXXFLAGS = -std=c++23 $(WARNINGS) -MMD -MP
 SRCS = main.cpp fs_info.cpp format.cpp table.cpp
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(OBJS:.o=.d)
+HDRS = $(wildcard *.hpp)
 
 release: CXXFLAGS += -O2 -DNDEBUG
 release: LDFLAGS += -s
@@ -24,6 +25,12 @@ dfpp: $(OBJS)
 clean:
 	rm -f dfpp $(OBJS) $(DEPS)
 
+format:
+	clang-format -i $(SRCS) $(HDRS)
+
+format-check:
+	clang-format --dry-run --Werror $(SRCS) $(HDRS)
+
 -include $(DEPS)
 
-.PHONY: release debug clean
+.PHONY: release debug clean format format-check

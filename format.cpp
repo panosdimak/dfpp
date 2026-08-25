@@ -26,12 +26,13 @@ std::string_view usage_ansi_code(double ratio) {
     static constexpr std::string_view usage_warn = "\033[38;5;223m";  // yellow
     static constexpr std::string_view usage_high = "\033[38;5;217m";  // red
 
-    if (ratio >= 0.0 && ratio < 0.6)
+    if (ratio >= 0.0 && ratio < 0.6) {
         return usage_low;
-    else if (ratio <= 0.8)
+    } else if (ratio <= 0.8) {
         return usage_warn;
-    else
+    } else {
         return usage_high;
+    }
 }
 
 std::array<std::string, 2> percentage_bar(double ratio, size_t width) {
@@ -51,8 +52,9 @@ std::array<std::string, 2> percentage_bar(double ratio, size_t width) {
 
     bar_segments[0] = std::views::repeat(full_block, full_size) | std::views::join | std::ranges::to<std::string>();
 
-    if (half)
+    if (half) {
         bar_segments[0] += half_block;
+    }
 
     bar_segments[1] += std::views::repeat(empty_block, empty_size) | std::views::join | std::ranges::to<std::string>();
 
