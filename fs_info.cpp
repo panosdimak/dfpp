@@ -14,7 +14,6 @@ namespace df {
 namespace {
 
 auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
-    FileSystemInfo info{};
     std::size_t start = 0;
 
     auto next_field = [&]() -> std::optional<std::string_view> {
@@ -34,11 +33,11 @@ auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
         return std::nullopt;
     }
 
-    info.device = *device;
-    info.mounted_on = std::filesystem::path{*mount};
-    info.fs_type = *fstype;
-
-    return info;
+    return FileSystemInfo{
+        .device{*device},
+        .fs_type{*fstype},
+        .mounted_on{*mount},
+    };
 }
 
 }  // namespace
