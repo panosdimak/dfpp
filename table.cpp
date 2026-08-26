@@ -94,10 +94,10 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
 
     std::string table;
 
-    constexpr std::string_view RESET = "\033[0m";
-    constexpr std::string_view BOLD_PALE_BLUE = "\033[1;38;5;153m";
-    constexpr std::string_view DIM_WHITE = "\033[2;38;5;231m";
-    constexpr std::string_view DIM_GRAY = "\033[38;5;240m";
+    static constexpr std::string_view RESET = "\033[0m";
+    static constexpr std::string_view BOLD_PALE_BLUE = "\033[1;38;5;153m";
+    static constexpr std::string_view DIM_WHITE = "\033[2;38;5;231m";
+    static constexpr std::string_view DIM_GRAY = "\033[38;5;240m";
 
     table += make_border("╭", "─", "─", "╮", max_fmt_sizes);
 
@@ -118,7 +118,7 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
 
     table += make_border("├", "─", "┼", "┤", max_fmt_sizes);
 
-    auto colorize = [&](std::string_view code, std::string_view text) {
+    auto colorize = [](std::string_view code, std::string_view text) {
         return std::string(code) + std::string(text) + std::string(RESET);
     };
 
