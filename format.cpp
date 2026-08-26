@@ -41,14 +41,16 @@ auto usage_ansi_code(double ratio) -> std::string_view {
     }
 }
 
-auto percentage_bar(double ratio, std::size_t width) -> std::array<std::string, 2> {
+auto percentage_bar(double ratio, std::size_t width) -> UsageBar {
     assert(ratio >= 0.0 && ratio <= 1.0);
-
-    std::array<std::string, 2> bar_segments;
 
     static constexpr std::string_view full_block = "█";
     static constexpr std::string_view half_block = "▌";
     static constexpr std::string_view empty_block = "░";
+
+    auto repeat_to_string = [](const std::string_view fill, const std::size_t length) {
+        return std::views::repeat(fill, length) | std::views::join | std::ranges::to<std::string>();
+    };
 
     const auto used = ratio * static_cast<double>(width);
     const auto full_size = static_cast<std::size_t>(used);
@@ -56,15 +58,12 @@ auto percentage_bar(double ratio, std::size_t width) -> std::array<std::string, 
     const auto half = frac >= 0.5;
     const auto empty_size = width - full_size - (half ? 1 : 0);
 
-    bar_segments[0] = std::views::repeat(full_block, full_size) | std::views::join | std::ranges::to<std::string>();
-
+    auto filled = repeat_to_string(full_block, full_size);
     if (half) {
-        bar_segments[0] += half_block;
+        filled += half_block;
     }
 
-    bar_segments[1] += std::views::repeat(empty_block, empty_size) | std::views::join | std::ranges::to<std::string>();
-
-    return bar_segments;
+    return UsageBar{.filled{std::move(filled)}, .empty{repeat_to_string(empty_block, empty_size)}};
 }
 
 }  // namespace df

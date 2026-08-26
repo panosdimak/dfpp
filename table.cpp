@@ -134,9 +134,9 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
         const auto type = colorize(DIM_WHITE, pad_right(row.type, max_fmt_sizes[5]));
         const auto device = colorize(DIM_WHITE, pad_right(row.device, max_fmt_sizes[6]));
 
-        const auto bar_segments = percentage_bar(row.usage_ratio, bar_width);
-        const auto full = colorize(usage_ansi_code(row.usage_ratio), bar_segments[0]);
-        const auto empty = colorize(DIM_GRAY, bar_segments[1]);
+        const auto usage_bar = percentage_bar(row.usage_ratio, bar_width);
+        const auto full = colorize(usage_ansi_code(row.usage_ratio), usage_bar.filled);
+        const auto empty = colorize(DIM_GRAY, usage_bar.empty);
         const auto pct_text = std::format("{:>{}}", row.pct, pct_field);
         const std::string pct_bar = full + empty + pct_text;
 
