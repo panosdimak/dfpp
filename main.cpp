@@ -30,7 +30,7 @@ auto main(int argc, char* argv[]) -> int {
         std::erase_if(entries, [&seen](const auto& fs) { return !seen.insert(fs.device).second; });
 
         for (auto& fs : entries) {
-            get_fs_stats(fs);
+            df::get_fs_stats(fs);
         }
 
         if (!varg_paths.empty()) {
