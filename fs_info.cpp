@@ -2,6 +2,7 @@
 
 #include <sys/statvfs.h>
 
+#include <cstddef>
 #include <expected>
 #include <filesystem>
 #include <format>
@@ -18,16 +19,16 @@ auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
 
     auto next_field = [&]() -> std::optional<std::string_view> {
         if (auto pos = line.find(' ', start); pos != std::string_view::npos) {
-            auto field = line.substr(start, pos - start);
+            const auto field = line.substr(start, pos - start);
             start = pos + 1;
             return field;
         }
         return std::nullopt;
     };
 
-    auto device = next_field();
-    auto mount = next_field();
-    auto fstype = next_field();
+    const auto device = next_field();
+    const auto mount = next_field();
+    const auto fstype = next_field();
 
     if (!device || !mount || !fstype) {
         return std::nullopt;
@@ -64,7 +65,7 @@ auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vecto
 
 auto get_fs_stats(FileSystemInfo& info) -> void {
     struct statvfs buf;
-    int ret = ::statvfs(info.mounted_on.c_str(), &buf);
+    const auto ret = ::statvfs(info.mounted_on.c_str(), &buf);
     if (!ret) {
         info.total_bytes = buf.f_blocks * buf.f_frsize;
         info.available_bytes = buf.f_bavail * buf.f_frsize;
@@ -78,7 +79,7 @@ auto is_real_filesystem(const FileSystemInfo& info) -> bool {
 
 auto find_mount_for_path(const std::vector<FileSystemInfo>& entries, const std::filesystem::path& target)
     -> std::optional<FileSystemInfo> {
-    size_t max_length = 0;
+    std::size_t max_length = 0;
     std::optional<FileSystemInfo> max_entry = std::nullopt;
     for (const auto& entry : entries) {
         if (!target.lexically_relative(entry.mounted_on).string().starts_with("..")) {
