@@ -9,6 +9,10 @@
 #include <string>
 #include <system_error>
 
+namespace df {
+
+namespace {
+
 auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
     FileSystemInfo info{};
     std::size_t start = 0;
@@ -37,6 +41,8 @@ auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
     return info;
 }
 
+}  // namespace
+
 auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vector<FileSystemInfo>, std::string> {
     std::vector<FileSystemInfo> vmounts;
     std::ifstream file(fpath);
@@ -59,7 +65,7 @@ auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vecto
 
 auto get_fs_stats(FileSystemInfo& info) -> void {
     struct statvfs buf;
-    int ret = statvfs(info.mounted_on.c_str(), &buf);
+    int ret = ::statvfs(info.mounted_on.c_str(), &buf);
     if (!ret) {
         info.total_bytes = buf.f_blocks * buf.f_frsize;
         info.available_bytes = buf.f_bavail * buf.f_frsize;
@@ -85,3 +91,5 @@ auto find_mount_for_path(const std::vector<FileSystemInfo>& entries, const std::
     }
     return max_entry;
 }
+
+}  // namespace df

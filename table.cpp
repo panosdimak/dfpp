@@ -1,3 +1,5 @@
+#include "table.hpp"
+
 #include <algorithm>
 #include <array>
 #include <format>
@@ -9,6 +11,10 @@
 
 #include "format.hpp"
 #include "types.hpp"
+
+namespace df {
+
+namespace {
 
 struct FormattedInfo {
     std::string mounted_on;
@@ -43,6 +49,8 @@ auto make_border(
 
     return border;
 }
+
+}  // namespace
 
 auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
     std::vector<FormattedInfo> fmt_info;
@@ -139,3 +147,5 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
 
     return table;
 }
+
+}  // namespace df

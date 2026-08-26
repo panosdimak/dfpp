@@ -5,6 +5,8 @@
 #include <optional>
 #include <string>
 
+namespace df {
+
 using Bytes = std::uint64_t;
 
 struct FileSystemInfo {
@@ -15,3 +17,5 @@ struct FileSystemInfo {
     std::optional<Bytes> used_bytes;
     std::filesystem::path mounted_on;
 };
+
+}  // namespace df

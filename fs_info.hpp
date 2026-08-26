@@ -1,14 +1,13 @@
 #pragma once
 
 #include <expected>
-#include <string_view>
+#include <filesystem>
+#include <optional>
 #include <vector>
 
 #include "types.hpp"
 
-// Parse a single line from /proc/mounts.
-// Returns nullopt if parsing fails
-auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo>;
+namespace df {
 
 // Read and parse all mounts from /proc/mounts
 auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vector<FileSystemInfo>, std::string>;
@@ -21,3 +20,5 @@ auto is_real_filesystem(const FileSystemInfo& info) -> bool;
 
 auto find_mount_for_path(const std::vector<FileSystemInfo>& entries, const std::filesystem::path& target)
     -> std::optional<FileSystemInfo>;
+
+}  // namespace df

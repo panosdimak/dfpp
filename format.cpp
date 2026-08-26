@@ -1,3 +1,5 @@
+#include "format.hpp"
+
 #include <array>
 #include <cassert>
 #include <format>
@@ -5,6 +7,8 @@
 #include <string>
 
 #include "types.hpp"
+
+namespace df {
 
 auto format_size(Bytes bytes) -> std::string {
     static constexpr std::array<std::string_view, 5> units{"B", "KiB", "MiB", "GiB", "TiB"};
@@ -61,3 +65,5 @@ auto percentage_bar(double ratio, size_t width) -> std::array<std::string, 2> {
 
     return bar_segments;
 }
+
+}  // namespace df

@@ -21,10 +21,10 @@ auto main(int argc, char* argv[]) -> int {
         }
     }
 
-    auto mounts = read_mounts("/proc/mounts");
+    auto mounts = df::read_mounts("/proc/mounts");
     if (mounts) {
         auto& entries = mounts.value();
-        std::erase_if(entries, [](const auto& fs) { return !is_real_filesystem(fs); });
+        std::erase_if(entries, [](const auto& fs) { return !df::is_real_filesystem(fs); });
 
         std::set<std::string> seen;
         std::erase_if(entries, [&seen](const auto& fs) { return !seen.insert(fs.device).second; });
@@ -34,9 +34,9 @@ auto main(int argc, char* argv[]) -> int {
         }
 
         if (!varg_paths.empty()) {
-            std::vector<FileSystemInfo> matches;
+            std::vector<df::FileSystemInfo> matches;
             for (const auto& arg : varg_paths) {
-                if (auto res = find_mount_for_path(entries, arg); res.has_value()) {
+                if (auto res = df::find_mount_for_path(entries, arg); res.has_value()) {
                     matches.push_back(std::move(*res));
                 } else {
                     std::println(stderr, "dfpp: cannot find mount for {}", arg.string());
@@ -47,9 +47,9 @@ auto main(int argc, char* argv[]) -> int {
             std::set<std::string> args_seen;
             std::erase_if(matches, [&args_seen](const auto& fs) { return !args_seen.insert(fs.device).second; });
 
-            std::println("{}", make_table(matches));
+            std::println("{}", df::make_table(matches));
         } else {
-            std::println("{}", make_table(mounts.value()));
+            std::println("{}", df::make_table(mounts.value()));
         }
     } else {
         std::println(stderr, "{}", mounts.error());
