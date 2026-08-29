@@ -65,7 +65,8 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
         fmt_row.type = row.fs_type;
         fmt_row.device = row.device;
 
-        fmt_row.usage_ratio = static_cast<double>(*row.used_bytes) / static_cast<double>(*row.total_bytes);
+        fmt_row.usage_ratio = static_cast<double>(*row.used_bytes) /
+                              (static_cast<double>(*row.used_bytes) + static_cast<double>(*row.available_bytes));
         fmt_row.pct = std::format("{:.1f}%", fmt_row.usage_ratio * 100);
 
         fmt_info.push_back(std::move(fmt_row));
