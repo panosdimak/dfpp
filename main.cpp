@@ -1,24 +1,18 @@
-#include <filesystem>
+#include <cstddef>
 #include <print>
 #include <set>
-#include <system_error>
+#include <span>
 #include <vector>
 
+#include "args.hpp"
 #include "fs_info.hpp"
 #include "table.hpp"
 
 auto main(int argc, char* argv[]) -> int {
-    std::vector<std::filesystem::path> varg_paths;
-    if (argc > 1) {
-        for (int i = 1; i < argc; i++) {
-            std::error_code ec;
-            auto path = std::filesystem::canonical(argv[i], ec);
-            if (ec) {
-                std::println(stderr, "dfpp: {}: {}", argv[i], ec.message());
-                return 1;
-            }
-            varg_paths.push_back(path);
-        }
+    auto arg_paths = df::read_arg_paths(std::span(argv, static_cast<std::size_t>(argc)).subspan(1));
+    if (!arg_paths) {
+        std::println(stderr, "dfpp: {}: {}", arg_paths.error().arg, arg_paths.error().ec.message());
+        return 1;
     }
 
     auto mounts = df::read_mounts("/proc/mounts");
@@ -33,9 +27,9 @@ auto main(int argc, char* argv[]) -> int {
             df::get_fs_stats(fs);
         }
 
-        if (!varg_paths.empty()) {
+        if (!arg_paths->empty()) {
             std::vector<df::FileSystemInfo> matches;
-            for (const auto& arg : varg_paths) {
+            for (const auto& arg : *arg_paths) {
                 if (auto res = df::find_mount_for_path(entries, arg); res.has_value()) {
                     matches.push_back(std::move(*res));
                 } else {

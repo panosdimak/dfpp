@@ -6,7 +6,7 @@ WARNINGS = -Wall -Wextra -pedantic \
 
 CXXFLAGS = -std=c++23 $(WARNINGS) -MMD -MP
 
-SRCS = main.cpp fs_info.cpp format.cpp table.cpp
+SRCS = main.cpp fs_info.cpp format.cpp table.cpp args.cpp
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(OBJS:.o=.d)
 HDRS = $(wildcard *.hpp)
