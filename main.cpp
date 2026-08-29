@@ -1,7 +1,10 @@
 #include <cstddef>
+#include <expected>
+#include <filesystem>
 #include <print>
 #include <set>
 #include <span>
+#include <string>
 #include <vector>
 
 #include "args.hpp"
@@ -49,10 +52,6 @@ auto main(int argc, char* argv[]) -> int {
 
     dedup_by_device(*mounts);
 
-    for (auto& fs : *mounts) {
-        df::get_fs_stats(fs);
-    }
-
     if (!arg_paths->empty()) {
         auto matches = resolve_arg_mounts(*arg_paths, *mounts);
         if (!matches) {
@@ -62,6 +61,10 @@ auto main(int argc, char* argv[]) -> int {
 
         mounts = std::move(*matches);
         dedup_by_device(*mounts);
+    }
+
+    for (auto& fs : *mounts) {
+        df::get_fs_stats(fs);
     }
 
     std::println("{}", df::make_table(*mounts));
