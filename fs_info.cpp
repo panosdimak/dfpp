@@ -74,23 +74,4 @@ auto get_fs_stats(FileSystemInfo& info) -> void {
     }
 }
 
-auto is_real_filesystem(const FileSystemInfo& info) -> bool {
-    return info.device.starts_with("/dev");
-}
-
-auto find_mount_for_path(const std::vector<FileSystemInfo>& entries, const std::filesystem::path& target)
-    -> std::optional<FileSystemInfo> {
-    std::size_t max_length = 0;
-    std::optional<FileSystemInfo> max_entry = std::nullopt;
-    for (const auto& entry : entries) {
-        if (!target.lexically_relative(entry.mounted_on).string().starts_with("..")) {
-            if (entry.mounted_on.string().size() > max_length) {
-                max_length = entry.mounted_on.string().size();
-                max_entry = entry;
-            }
-        }
-    }
-    return max_entry;
-}
-
 }  // namespace df
