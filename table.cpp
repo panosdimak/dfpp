@@ -58,15 +58,16 @@ auto make_table(const std::vector<FileSystemInfo>& info) -> std::string {
 
     for (const auto& row : info) {
         FormattedInfo fmt_row;
-        fmt_row.mounted_on = row.mounted_on.string();
-        fmt_row.total_size = format_size(*row.total_bytes);
-        fmt_row.used_size = format_size(*row.used_bytes);
-        fmt_row.avail_size = format_size(*row.available_bytes);
-        fmt_row.type = row.fs_type;
-        fmt_row.device = row.device;
+        fmt_row.mounted_on = row.mount.mounted_on.string();
+        fmt_row.total_size = format_size(row.usage.total_bytes);
+        fmt_row.used_size = format_size(row.usage.used_bytes);
+        fmt_row.avail_size = format_size(row.usage.available_bytes);
+        fmt_row.type = row.mount.fs_type;
+        fmt_row.device = row.mount.device;
 
-        fmt_row.usage_ratio = static_cast<double>(*row.used_bytes) /
-                              (static_cast<double>(*row.used_bytes) + static_cast<double>(*row.available_bytes));
+        fmt_row.usage_ratio =
+            static_cast<double>(row.usage.used_bytes) /
+            (static_cast<double>(row.usage.used_bytes) + static_cast<double>(row.usage.available_bytes));
         fmt_row.pct = std::format("{:.1f}%", fmt_row.usage_ratio * 100);
 
         fmt_info.push_back(std::move(fmt_row));

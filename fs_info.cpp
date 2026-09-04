@@ -5,8 +5,8 @@
 #include <cstddef>
 #include <expected>
 #include <filesystem>
-#include <format>
 #include <fstream>
+#include <optional>
 #include <string>
 #include <system_error>
 
@@ -14,7 +14,7 @@ namespace df {
 
 namespace {
 
-auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
+auto parse_mount_line(std::string_view line) -> std::optional<MountEntry> {
     std::size_t start = 0;
 
     auto next_field = [&]() -> std::optional<std::string_view> {
@@ -34,7 +34,7 @@ auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
         return std::nullopt;
     }
 
-    return FileSystemInfo{
+    return MountEntry{
         .device{*device},
         .fs_type{*fstype},
         .mounted_on{*mount},
@@ -43,15 +43,13 @@ auto parse_mount_line(std::string_view line) -> std::optional<FileSystemInfo> {
 
 }  // namespace
 
-auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vector<FileSystemInfo>, std::string> {
-    std::vector<FileSystemInfo> vmounts;
+auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vector<MountEntry>, std::error_code> {
+    std::vector<MountEntry> vmounts;
     std::ifstream file(fpath);
     std::string line;
 
     if (!file.is_open()) {
-        return std::unexpected(
-            std::format("{}: {}", fpath.string(), std::error_code(errno, std::system_category()).message())
-        );
+        return std::unexpected(std::error_code(errno, std::system_category()));
     }
 
     while (std::getline(file, line)) {
@@ -63,15 +61,19 @@ auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vecto
     return vmounts;
 }
 
-auto get_fs_stats(FileSystemInfo& info) -> void {
+auto get_fs_stats(const std::filesystem::path& mount_point) -> std::expected<Usage, std::error_code> {
     struct statvfs buf;
-    const auto ret = ::statvfs(info.mounted_on.c_str(), &buf);
-    if (!ret) {
-        info.total_bytes = buf.f_blocks * buf.f_frsize;
-        info.available_bytes = buf.f_bavail * buf.f_frsize;
-        Bytes free_bytes = buf.f_bfree * buf.f_frsize;
-        info.used_bytes = *info.total_bytes - free_bytes;
+    const auto ret = ::statvfs(mount_point.c_str(), &buf);
+    if (ret != 0) {
+        return std::unexpected(std::error_code(errno, std::system_category()));
     }
+
+    const Bytes total_bytes = buf.f_blocks * buf.f_frsize;
+    const Bytes available_bytes = buf.f_bavail * buf.f_frsize;
+    const Bytes free_bytes = buf.f_bfree * buf.f_frsize;
+    const Bytes used_bytes = total_bytes - free_bytes;
+
+    return Usage{.total_bytes = total_bytes, .used_bytes = used_bytes, .available_bytes = available_bytes};
 }
 
 }  // namespace df

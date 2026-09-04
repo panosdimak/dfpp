@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <print>
 #include <span>
+#include <vector>
 
 #include "args.hpp"
 #include "fs_info.hpp"
@@ -14,32 +15,38 @@ auto main(int argc, char* argv[]) -> int {
         return 1;
     }
 
-    auto mounts = df::read_mounts("/proc/mounts");
-    if (!mounts) {
-        std::println(stderr, "dfpp: {}", mounts.error());
+    auto mount_entries = df::read_mounts("/proc/mounts");
+    if (!mount_entries) {
+        std::println(stderr, "dfpp: /proc/mounts: {}", mount_entries.error().message());
         return 1;
     }
 
-    df::filter_real(*mounts);
-
-    df::dedup_by_device(*mounts);
+    df::filter_real(*mount_entries);
+    df::dedup_by_device(*mount_entries);
 
     if (!arg_paths->empty()) {
-        auto matches = df::resolve_arg_mounts(*arg_paths, *mounts);
+        auto matches = df::resolve_arg_mounts(*arg_paths, *mount_entries);
         if (!matches) {
             std::println(stderr, "dfpp: cannot find mount for {}", matches.error());
             return 1;
         }
 
-        mounts = std::move(*matches);
-        df::dedup_by_device(*mounts);
+        mount_entries = std::move(*matches);
+        df::dedup_by_device(*mount_entries);
     }
 
-    for (auto& fs : *mounts) {
-        df::get_fs_stats(fs);
+    std::vector<df::FileSystemInfo> filesystems;
+    filesystems.reserve(mount_entries->size());
+    for (auto& entry : *mount_entries) {
+        auto usage = df::get_fs_stats(entry.mounted_on);
+        if (!usage) {
+            std::println(stderr, "dfpp: {}: {}", entry.mounted_on.string(), usage.error().message());
+            return 1;
+        }
+        filesystems.emplace_back(std::move(entry), *usage);
     }
 
-    std::println("{}", df::make_table(*mounts));
+    std::println("{}", df::make_table(filesystems));
 
     return 0;
 }
