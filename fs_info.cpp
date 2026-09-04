@@ -45,17 +45,21 @@ auto parse_mount_line(std::string_view line) -> std::optional<MountEntry> {
 
 auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vector<MountEntry>, std::error_code> {
     std::vector<MountEntry> vmounts;
-    std::ifstream file(fpath);
-    std::string line;
+    std::ifstream is{fpath};
 
-    if (!file.is_open()) {
+    if (!is.is_open()) {
         return std::unexpected(std::error_code(errno, std::system_category()));
     }
 
-    while (std::getline(file, line)) {
+    std::string line;
+    while (std::getline(is, line)) {
         if (auto info = parse_mount_line(line); info) {
             vmounts.push_back(std::move(*info));
         }
+    }
+
+    if (is.bad()) {
+        return std::unexpected(std::make_error_code(std::errc::io_error));
     }
 
     return vmounts;
