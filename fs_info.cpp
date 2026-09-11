@@ -73,7 +73,9 @@ auto read_mounts(const std::filesystem::path& fpath) -> std::expected<std::vecto
     std::ifstream is{fpath};
 
     if (!is.is_open()) {
-        return std::unexpected(std::error_code(errno, std::system_category()));
+        return std::unexpected(
+            std::error_code(errno, std::system_category())
+        );  // errno comes from ifstream constructor's underlying open
     }
 
     std::string line;
