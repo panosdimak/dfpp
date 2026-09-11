@@ -2,6 +2,7 @@
 
 #include <sys/statvfs.h>
 
+#include <charconv>
 #include <cstddef>
 #include <expected>
 #include <filesystem>
@@ -14,14 +15,38 @@ namespace df {
 
 namespace {
 
+auto unescape(std::string_view field) -> std::string {
+    std::string out;
+    out.reserve(field.size());
+
+    for (std::size_t i = 0; i < field.size();) {
+        if (field[i] == '\\' && i + 4 <= field.size()) {
+            const auto digits = field.substr(i + 1, 3);
+            unsigned esc_value = 0;
+            const auto [ptr, ec] = std::from_chars(digits.data(), digits.data() + digits.size(), esc_value, 8);
+
+            if (ec == std::errc{} && ptr == digits.data() + digits.size()) {
+                out.push_back(static_cast<char>(esc_value));
+                i += 4;
+                continue;
+            }
+        }
+        out.push_back(static_cast<char>(field[i]));
+        i += 1;
+    }
+
+    return out;
+}
+
 auto parse_mount_line(std::string_view line) -> std::optional<MountEntry> {
     std::size_t start = 0;
 
-    auto next_field = [&]() -> std::optional<std::string_view> {
+    auto next_field = [&]() -> std::optional<std::string> {
         if (auto pos = line.find(' ', start); pos != std::string_view::npos) {
-            const auto field = line.substr(start, pos - start);
+            auto field = line.substr(start, pos - start);
             start = pos + 1;
-            return field;
+
+            return unescape(field);
         }
         return std::nullopt;
     };
